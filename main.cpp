@@ -240,6 +240,99 @@ public:
 };
 
 
+class Decision : public sf::Drawable
+{
+private:
+    sf::Vector2f Padding = sf::Vector2f(30,30);
+    sf::Vector2f Position = sf::Vector2f(0,0); //initial
+    sf::Vector2f Scale = sf::Vector2f(1,1);
+    sf::Color text_outline_color = sf::Color::Black;
+    sf::String str  = "Text_Here";
+
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
+        {
+            // You can draw other high-level objects
+            target.draw(shape, states);
+            target.draw(text, states);
+        }
+
+    void setOrigin()
+    {
+        shape.setOrigin(shape.getGlobalBounds().width/2, shape.getGlobalBounds().height/2);
+        text.setOrigin(text.getGlobalBounds().width/2, text.getGlobalBounds().height/2+5*Scale.y);
+    }
+
+public:
+    sf::CircleShape shape;
+    sf::Font font;
+    sf::Text text;
+
+    Decision()
+    {
+        shape.setRadius(40);
+        shape.setPointCount(4); //4 is fixed here
+        setOrigin();
+        shape.setScale(Scale);
+        setOrigin();
+        shape.setPosition(Position);
+        shape.setOutlineThickness(4/(Scale.x+Scale.y));
+        shape.setOutlineColor(text_outline_color);
+        shape.setFillColor(sf::Color::White);
+
+
+        if (!font.loadFromFile("Roboto-Regular.ttf"))
+            std::cout << "Error loading font" << std::endl;
+
+        text.setFont(font);
+
+        setString(str);
+
+        text.setCharacterSize(14*pow((Scale.x+Scale.y)/2, 0.7)); // in pixels, not points! // depends on scale
+        setOrigin();
+
+        text.setFillColor(text_outline_color);
+        text.setPosition(Position);
+        // set the text style
+        //text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
+    }
+
+    void setString(const sf::String &s)
+    {
+        str = s;
+        text.setString(str);
+
+        float rsize(Padding.x + text.getGlobalBounds().width/2);
+        setOrigin();
+        shape.setRadius(rsize);
+        setOrigin();
+    }
+
+    void setPosition(const sf::Vector2f &pos)
+    {
+         Position = pos;
+         shape.setPosition(Position);
+         text.setPosition(Position);
+    }
+////    void setScale(const sf::Vector2f &sc)
+////    {
+////        Scale = sc;
+////        r.setOrigin(r.getGlobalBounds().width/2, r.getGlobalBounds().height/2);
+////        r.setScale(Scale);
+////        r.setOutlineThickness(4/(Scale.x+Scale.y));
+////        r.setOrigin(r.getGlobalBounds().width/2, r.getGlobalBounds().height/2);
+////        text.setCharacterSize(14*pow((Scale.x+Scale.y)/2, 0.7));
+////        text.setOrigin(text.getGlobalBounds().width/2, text.getGlobalBounds().height/2+3*Scale.y);
+////    }
+    void setColor(const sf::Color color)
+    {
+        text_outline_color = color;
+        shape.setOutlineColor(text_outline_color);
+        text.setFillColor(text_outline_color);
+    }
+};
+
+
 
 int main()
 {
@@ -263,6 +356,15 @@ int main()
     shape2.setPosition(sf::Vector2f(200,300));
     shape2.setString("Start");
 
+    Decision shape3;
+    //shape3.setColor(sf::Color::Red);
+    shape3.setPosition(sf::Vector2f(500,400));
+    //shape3.setScale(sf::Vector2f(2,2));
+    shape3.setPosition(sf::Vector2f(300,400));
+    shape3.setString("if(sajil == you");
+    shape3.setPosition(sf::Vector2f(400,300));
+
+
     while (window.isOpen())
     {
         //window.clear(sf::Color::White);
@@ -276,6 +378,7 @@ int main()
         window.clear(sf::Color::White);
         window.draw(shape);
         window.draw(shape2);
+        window.draw(shape3);
         window.display();
     }
 
