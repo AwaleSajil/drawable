@@ -6,7 +6,7 @@ using namespace std;
 class Process : public sf::Drawable
 {
 private:
-    sf::Vector2f Position = sf::Vector2f(500,400); //initial
+    sf::Vector2f Position = sf::Vector2f(0,0); //initial
     sf::Vector2f Scale = sf::Vector2f(1,1);
     sf::Color text_outline_color = sf::Color::Black;
 
@@ -73,6 +73,7 @@ public:
         r.setScale(Scale);
         r.setOutlineThickness(4/(Scale.x+Scale.y));
         text.setCharacterSize(14*pow((Scale.x+Scale.y)/2, 0.7));
+        text.setOrigin(text.getGlobalBounds().width/2, text.getGlobalBounds().height/2+3*Scale.y);
     }
     void setColor(const sf::Color color)
     {
@@ -91,7 +92,9 @@ int main()
 
     Process shape;
     cout << "width: " << shape.text.getGlobalBounds().width << " height: " << shape.text.getGlobalBounds().height << endl;
-
+    //shape.setColor(sf::Color::Red);
+    shape.setPosition(sf::Vector2f(500,400));
+    shape.setScale(sf::Vector2f(2,2));
     while (window.isOpen())
     {
         //window.clear(sf::Color::White);
