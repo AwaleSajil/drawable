@@ -2,8 +2,11 @@
 #include <cmath>
 #include<sstream>
 #include <SFML/Graphics.hpp>
+#include<vector>
+
 
 using namespace std;
+
 
 
 class EllipseShape : public sf::Shape
@@ -49,6 +52,7 @@ private :
     sf::Vector2f m_radius;
 };
 
+
 class Process : public sf::Drawable
 {
 private:
@@ -65,11 +69,18 @@ private:
             target.draw(text, states);
         }
 
+    void setOrigin()
+    {
+        r.setOrigin(r.getGlobalBounds().width/2, r.getGlobalBounds().height/2);
+        text.setOrigin(text.getGlobalBounds().width/2, text.getGlobalBounds().height/2+5*Scale.y);
+    }
 public:
 
     sf::RectangleShape r;
+
     sf::Font font;
     sf::Text text;
+
 
     Process()
     {
@@ -77,7 +88,7 @@ public:
 
         //cout << "rect: " << r.getSize().x << " , " << r.getSize().y << endl;
         r.setSize(sf::Vector2f(150, 50)); //hve to update on  setstring
-        r.setOrigin(r.getGlobalBounds().width/2, r.getGlobalBounds().height/2);
+        setOrigin();
         cout << "rect: before: " << r.getGlobalBounds().width << " , " << r.getGlobalBounds().height << endl;
         r.setScale(Scale);
         //cout << "rect: " << r.getSize().x << " , " << r.getSize().y << endl;
@@ -101,7 +112,7 @@ public:
         text.setString(str);      // have to be user selectable
 
         text.setCharacterSize(14*pow((Scale.x+Scale.y)/2, 0.7)); // in pixels, not points! // depends on scale
-        text.setOrigin(text.getGlobalBounds().width/2, text.getGlobalBounds().height/2+3*Scale.y);
+        setOrigin();
         // set the color
         text.setColor(text_outline_color);
         text.setPosition(Position);
@@ -116,12 +127,11 @@ public:
         text.setString(str);
 
         sf::Vector2f rsize(2*Padding.x + text.getGlobalBounds().width , 2*Padding.y + text.getGlobalBounds().height);
-        r.setOrigin(r.getGlobalBounds().width/2, r.getGlobalBounds().height/2);
+        setOrigin();
         r.setSize(sf::Vector2f(rsize));
-        r.setOrigin(r.getGlobalBounds().width/2, r.getGlobalBounds().height/2);
+        setOrigin();
 
 //
-        text.setOrigin(text.getGlobalBounds().width/2, text.getGlobalBounds().height/2+3*Scale.y);
 
 
     }
@@ -148,6 +158,25 @@ public:
         r.setOutlineColor(text_outline_color);
         text.setColor(text_outline_color);
     }
+
+    void getCornerCoordinates(sf::Vector2f *vertices)
+    {
+        Position = r.getPosition();
+        sf::FloatRect Bounds = r.getGlobalBounds();
+
+        vertices[0].x = (Position.x - (Bounds.width)/2);
+        vertices[0].y = (Position.y + (Bounds.height)/2);
+
+        vertices[1].x = (Position.x + (Bounds.width)/2);
+        vertices[1].y = (Position.y + (Bounds.height)/2);
+
+        vertices[2].x = (Position.x + (Bounds.width)/2);
+        vertices[2].y = (Position.y - (Bounds.height)/2);
+
+        vertices[3].x = (Position.x - (Bounds.width)/2);
+        vertices[3].y = (Position.y - (Bounds.height)/2);
+    }
+
 };
 
 
@@ -335,8 +364,25 @@ public:
         shape.setOutlineColor(text_outline_color);
         text.setColor(text_outline_color);
     }
-};
 
+    void getCornerCoordinates(sf::Vector2f *vertices)
+    {
+        Position = shape.getPosition();
+        float radius = shape.getRadius();
+
+        vertices[0].x = Position.x;
+        vertices[0].y = Position.y + radius;
+
+        vertices[1].x = Position.x + radius;
+        vertices[1].y = Position.y;
+
+        vertices[2].x = Position.x;
+        vertices[2].y = Position.y - radius;
+
+        vertices[3].x = Position.x - radius;
+        vertices[3].y = Position.y;
+    }
+};
 
 class InputOutput : public sf::Drawable
 {
@@ -442,48 +488,68 @@ public:
         shape.setOutlineColor(text_outline_color);
         text.setColor(text_outline_color);
     }
+
+    void getCornerCoordinates(sf::Vector2f *vertices)
+    {
+        for(int i =0; i<4; i++)
+        {
+            vertices[i] = shape.getPoint(i);
+        }
+    }
 };
 
 
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
+
+    // start
+    sf::RenderWindow window(sf::VideoMode(800, 600,32), "SFML works!");
+
+    //vector define
+    vector<Process> process;
+    vector<Terminator> terminator;
+    vector<Decision> decision;
+    vector<InputOutput> inputOutput;
+
+    //temprorary variables
+    Process temProcess;
+    Terminator temTerminator;
+    Decision temDecision;
+    InputOutput temInputOutput;
+
+    //for pointing every varible
 
 
 
-    Process shape;
-    cout << "width: " << shape.text.getGlobalBounds().width << " height: " << shape.text.getGlobalBounds().height << endl;
-    //shape.setColor(sf::Color::Red);
-    //shape.setPosition(sf::Vector2f(500,400));
-    //shape.setScale(sf::Vector2f(2,2));
-    //shape.setPosition(sf::Vector2f(500,400));
-    shape.setString("My name is Sajil Awale");
-    shape.setPosition(sf::Vector2f(400,400));
-
-    Terminator shape2;
-    //shape2.setColor(sf::Color::Red);
-    shape2.setPosition(sf::Vector2f(500,400));
-    //shape2.setScale(sf::Vector2f(2,2));
-    shape2.setPosition(sf::Vector2f(200,300));
-    shape2.setString("Start");
-
-    InputOutput shape4;
-    //shape4.setColor(sf::Color::Red);
-    shape4.setPosition(sf::Vector2f(500,400));
-    //shape4.setScale(sf::Vector2f(2,2));
-    shape4.setPosition(sf::Vector2f(300,400));
-    shape4.setString("Print A, B and C");
-    shape4.setPosition(sf::Vector2f(400,300));
+    // Process shape;
+   // cout << "width: " << shape.text.getGlobalBounds().width << " height: " << shape.text.getGlobalBounds().height << endl;
 
 
 
+    //shape.setString("My name is Sajil Awale");
+    //shape.setPosition(sf::Vector2f(400,400));
+
+    //Terminator shape2;
+    //shape2.setPosition(sf::Vector2f(500,400));
+
+    //shape2.setPosition(sf::Vector2f(200,300));
+    //shape2.setString("Start");
+
+
+    // boollen for thing likely to happen
+
+  //  bool isTemPro=0,isTemTer=0,isTemDec=0;
+    //bool isAny=false;
+
+    bool isDecision=false,isProcess=false,isTerminator=false,isInputOutput=false;
+   // Decision shape3;
     int a=0;
-    bool isAny=false;
-    Decision shape3;
+
     while (window.isOpen())
     {
-        //window.clear(sf::Color::White);
+
+        //evnets handle
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -492,47 +558,192 @@ int main()
 
         }
 
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
-            isAny=true;
-
-        }
+        //keyboard hndling
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) window.close();
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) isDecision=true;
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) isTerminator=true;
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) isProcess=true;
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::I)) isInputOutput=true;
 
         window.clear(sf::Color::White);
-        window.draw(shape);
-        window.draw(shape2);
-        window.draw(shape4);
 
-        if(a==1)window.draw(shape3);
 
-        if(isAny==true){
+        //if any key processed
+
+        //for hovering pointer
+        if(isDecision==true|| isTerminator==true || isProcess==true|| isInputOutput==true){
 
 
             float Mx = sf::Mouse::getPosition(window).x;
             float My = sf::Mouse::getPosition(window).y;
-            stringstream ss,s2;
-            ss << Mx;
-            s2 << My;
+            //stringstream ss,s2;
+            //ss << Mx;
+            //s2 << My;
 
-            string str = ss.str();
-            string str2 = s2.str();
+            //string str = ss.str();
+            //string str2 = s2.str();
 
-            shape3.setString(str +" "+str2);//"if(sajil == you");
-            shape3.setPosition(sf::Vector2f(Mx,My));
+          //  if (isTerminator==true) //"if(sajil == you");
 
-            a=1;
+            //pointer initialzation
 
-            if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
-            {
-                isAny=false;
+           // if (isDecision==true) shape3.setString("Place shape in screen");/
+            if(isProcess==true){
+                temProcess.setPosition(sf::Vector2f(Mx,My));
+                temProcess.setString("Place shape in screen");
+                temProcess.setColor(sf::Color(0,255,255));
+                window.draw(temProcess);
 
+            }
+            else if(isTerminator==true){
+                temTerminator.setPosition(sf::Vector2f(Mx,My));
+                temTerminator.setString("Place shape in screen");
+                temTerminator.setColor(sf::Color(0,255,255));
+                window.draw(temTerminator);
+
+            }
+            else if(isDecision==true){
+                temDecision.setPosition(sf::Vector2f(Mx,My));
+                temDecision.setString("Place shape in screen");
+                temDecision.setColor(sf::Color(0,255,255));
+                window.draw(temDecision);
+
+            }
+            else if(isInputOutput==true){
+                temInputOutput.setPosition(sf::Vector2f(Mx,My));
+                temInputOutput.setString("Place shape in screen");
+                temInputOutput.setColor(sf::Color(0,255,255));
+                window.draw(temInputOutput);
 
             }
 
+            a=1;
+            string st;
+            sf::String text;
+
+            //for adding object
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+            {
+
+
+                sf::VideoMode VBMode(300, 300, 32);
+                sf::RenderWindow inputField(VBMode, "Input");
+
+                 while (inputField.isOpen())
+                {
+                    sf::Event event2;
+                    while (inputField.pollEvent(event2))
+                    {
+                        if (event2.type == sf::Event::Closed)
+                            inputField.close();
+                                           // In event loop...
+
+                        if (event2.type == sf::Event::TextEntered)
+                        {
+                            // Handle ASCII characters only
+                            if (event2.text.unicode < 128)
+                            {
+                                if(event2.text.unicode==8) st=st.substr(0,st.size()-1);
+                                else if (event2.text.unicode==13) {
+                                    a=0;
+
+                                    if(isProcess==true){
+                                 //       rocess.resize(process.size()+1);
+                                        temProcess.setString(st);
+                                        process.push_back(temProcess);
+
+                                    }
+                                    else if(isTerminator==true){
+                                 //       rocess.resize(process.size()+1);
+                                        cout<<"terminator";
+                                        temTerminator.setString(st);
+                                        terminator.push_back(temTerminator);
+
+                                    }
+                                    else if(isDecision==true){
+                                 //       rocess.resize(process.size()+1);
+                                        temDecision.setString(st);
+                                        decision.push_back(temDecision);
+
+                                    }else if(isInputOutput==true){
+                                 //       rocess.resize(process.size()+1);
+                                        temInputOutput.setString(st);
+                                        inputOutput.push_back(temInputOutput);
+
+                                    }
+
+                                    inputField.close();
+
+                                }
+                                else if (event2.text.unicode >= 32 &&event2.text.unicode <= 126 ) st += (event2.text.unicode);
+                            }
+                        }
+
+
+                    }
+
+                    inputField.clear(sf::Color::White);
+                    //font stuff
+                    sf::Font font;
+                    if (!font.loadFromFile("arial.ttf"))
+                    {
+                        cout<<"error in loading font";
+                        exit(0);
+                    }
+                    sf::Text outText;
+                    // select the font
+                    outText.setFont(font); // font is a sf::Font
+                    // set the string to display
+                    outText.setString(st);
+                    // set the character size
+                    outText.setCharacterSize(15); // in pixels, not points!
+                    // set the color
+                    outText.setColor(sf::Color::Black);
+
+
+                    inputField.draw(outText);
+                    inputField.display();
+                }
+
+
+                //isAny=false;
+                isProcess=false;
+                isDecision=false;
+                isTerminator=false;
+                isInputOutput=false;
+            }
+
+        }
+
+      //  cout<<(int)process.size();
+
+        for(int count=0;count<process.size();count++){
+            process[count].setColor(sf::Color::Black);
+            window.draw(process[count]);
+          //  exit(0);
+        }
+//
+        for(int count=0;count<decision.size();count++){
+            decision[count].setColor(sf::Color::Black);
+            window.draw(decision[count]);
+  //          exit(0);
+        }
+        for(int count=0;count<terminator.size();count++){
+            terminator[count].setColor(sf::Color::Black);
+            window.draw(terminator[count]);
+          //  exit(0);
+        }
+
+        for(int count=0;count<inputOutput.size();count++){
+            inputOutput[count].setColor(sf::Color::Black);
+            window.draw(inputOutput[count]);
+          //  exit(0);
         }
 
         window.display();
     }
 
+    int pause;
+    cin>>pause;
     return 0;
 }
